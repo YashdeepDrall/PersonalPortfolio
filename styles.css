@@ -308,10 +308,70 @@ footer .footer-rights {
     background: rgb(109, 109, 238);
     transition: all 0.2s ease;
     z-index: 9999;
+    animation: pulse 2s infinite;
 }
 .chatbot-toggler:hover {
     transform: scale(1.1);
 }
+
+.chatbot-toggler span {
+    display: inline-block;
+    animation: wave 2.5s infinite;
+    transform-origin: 70% 70%;
+}
+
+.chatbot-toggler::after {
+    content: "Chat with me😊";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 10px;
+    background: rgb(109, 109, 238);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: none;
+    animation: shake 4s linear infinite;
+    transform-origin: bottom center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(109, 109, 238, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(109, 109, 238, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(109, 109, 238, 0);
+    }
+}
+
+@keyframes wave {
+    0% { transform: rotate(0deg); }
+    10% { transform: rotate(14deg); }
+    20% { transform: rotate(-8deg); }
+    30% { transform: rotate(14deg); }
+    40% { transform: rotate(-4deg); }
+    50% { transform: rotate(10deg); }
+    60% { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(-50%) rotate(0deg); }
+    5% { transform: translateX(-50%) rotate(-10deg); }
+    10% { transform: translateX(-50%) rotate(10deg); }
+    15% { transform: translateX(-50%) rotate(-10deg); }
+    20% { transform: translateX(-50%) rotate(0deg); }
+}
+
 .chatbot-container {
     position: fixed;
     right: 35px;
@@ -338,6 +398,15 @@ body.show-chatbot .chatbot-container {
     opacity: 1;
     pointer-events: auto;
     transform: scale(1);
+}
+body.show-chatbot .chatbot-toggler {
+    animation: none;
+}
+body.show-chatbot .chatbot-toggler span {
+    animation: none;
+}
+body.show-chatbot .chatbot-toggler::after {
+    display: none;
 }
 .chatbot-header {
     background: rgb(109, 109, 238);
