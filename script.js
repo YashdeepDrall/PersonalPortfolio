@@ -205,12 +205,32 @@ const sendFeedback = (chatId, feedback) => {
     }).catch(err => console.error("Error sending feedback:", err));
 }
 
+const formatMessage = (text) => {
+    const urlPattern = "https?:\\/\\/[^\\s]+";
+    const emailPattern = "[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9._-]+";
+    const phonePattern = "(?:\\+?\\d{1,3}[-.\\s]?)?\\(?\\d{2,3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}";
+    const combinedRegex = new RegExp(`(${urlPattern})|(${emailPattern})|(${phonePattern})`, 'g');
+
+    let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+    return safeText.replace(combinedRegex, (match, url, email, phone) => {
+        if (url) {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: inherit;">${url}</a>`;
+        } else if (email) {
+            return `<a href="mailto:${email}" style="text-decoration: underline; color: inherit;">${email}</a>`;
+        } else if (phone) {
+            return `<a href="tel:${phone.replace(/[^\d+]/g,'')}" style="text-decoration: underline; color: inherit;">${phone}</a>`;
+        }
+        return match;
+    });
+};
+
 const createChatLi = (message, className) => {
     const chatLi = document.createElement("li");
     chatLi.classList.add("chat", className);
     let chatContent = className === "outgoing" ? `<p></p>` : `<span>🤖</span><div class="message-content"><p></p><div class="chat-feedback"><button class="feedback-btn like" data-tooltip="Good response"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="feedback-btn dislike" data-tooltip="Bad response"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg></button><button class="feedback-btn copy" data-tooltip="Copy response"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><span class="feedback-text"></span></div></div>`;
     chatLi.innerHTML = chatContent;
-    chatLi.querySelector("p").textContent = message;
+    chatLi.querySelector("p").innerHTML = formatMessage(message);
 
     if (className === "incoming") {
         const feedbackText = chatLi.querySelector(".feedback-text");
@@ -287,7 +307,7 @@ const generateResponse = (chatElement) => {
             return res.json();
         })
         .then(data => {
-            messageElement.textContent = data.answer || data.response || JSON.stringify(data);
+            messageElement.innerHTML = formatMessage(data.answer);
             if (data.chat_id) {
                 chatElement.setAttribute("data-chat-id", data.chat_id);
             }
